@@ -3,6 +3,8 @@
 
 Este repositório contém o kit de reprodução de experimentos do artigo que investiga mecanismos de equilíbrio e compartilhamento de recursos em sistemas de offloading adaptativo para Early-Exit Deep Neural Networks (EEDNNs), utilizando Multi-Armed Bandits (MABs).
 
+A aplicação pode ser acessada em: https://sbrc-2026-offloading-adaptativo-mab.streamlit.app/
+
 ## Estrutura do Projeto
 
 - `app.py`: Código-fonte principal da aplicação e da simulação.
