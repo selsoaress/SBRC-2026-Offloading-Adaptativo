@@ -18,16 +18,16 @@ Recomenda-se o uso de um ambiente virtual para isolar as dependências do projet
 2. Crie e ative um ambiente virtual:
 
    Windows:
-   `python -m venv venv  
-   .\venv\Scripts\activate` 
+   ` python -m venv venv `  
+   ` .\venv\Scripts\activate ` 
 
    Linux / macOS:
-   `python3 -m venv venv  
-   source venv/bin/activate` 
+   ` python3 -m venv venv `  
+   ` source venv/bin/activate ` 
 
 3. Instale as dependências necessárias:
 
-   `pip install -r requirements.txt`
+   ` pip install -r requirements.txt `
 
 ## Execução
 
