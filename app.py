@@ -74,16 +74,16 @@ class UCBAgent:
         self.counts[idx] += 1
         self.values[idx] += (reward - self.values[idx]) / self.counts[idx]
 
-def calc_reward(agente, intent, success, ci, cl, custo_fixo, custo_max_penalty):
-    
+def calc_reward(agente, intent, success, ci, cl):
+
     # se não tem intenção de offloading, processa local (ci)
-    if not intent: return ci
+    if not intent: return 0.0
 
     # incorporando escassez de recursos à função de custo de offloading
     consumption_bonus = (agente.e0 - agente.e) / agente.e0
-    custo = custo_fixo + (custo_max_penalty * consumption_bonus)
+    
 
-    return (cl + consumption_bonus) if success else 0.0
+    return (cl + consumption_bonus) if success else consumption_bonus
 
 
 def smooth(x, w):
