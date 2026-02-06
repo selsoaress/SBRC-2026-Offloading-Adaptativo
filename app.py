@@ -3,7 +3,6 @@ import numpy as np
 import plotly.graph_objects as go
 from scipy.stats import beta
 
-
 st.set_page_config(layout="wide", page_title="Offloading Simulation")
 
 st.markdown("""
@@ -74,7 +73,8 @@ class UCBAgent:
         self.counts[idx] += 1
         self.values[idx] += (reward - self.values[idx]) / self.counts[idx]
 
-def calc_reward(agente, intent, success, ci, cl):
+# Correção aqui: Adicionados os parâmetros cost_fixed e cost_penalty na definição
+def calc_reward(agente, intent, success, ci, cl, cost_fixed, cost_penalty):
 
     # se não tem intenção de offloading, processa local (ci)
     if not intent: return 0.0
@@ -82,7 +82,6 @@ def calc_reward(agente, intent, success, ci, cl):
     # incorporando escassez de recursos à função de custo de offloading
     consumption_bonus = (agente.e0 - agente.e) / agente.e0
     
-
     return (cl + consumption_bonus) if success else consumption_bonus
 
 
@@ -91,8 +90,8 @@ def smooth(x, w):
     return np.convolve(x, np.ones(w)/w, 'valid')
 
 
-
-tab1, tab2, tab3 = st.tabs(["Ambiente", "Simulação", "Sensibilidade"])
+# Removida a "Sensibilidade" da lista de tabs
+tab1, tab2 = st.tabs(["Ambiente", "Simulação"])
 
 with tab1:
     rv_ci = beta(ci_a, ci_b)
@@ -143,7 +142,7 @@ with tab2:
                 elif int1: s1 = True
                 elif int2: s2 = True
 
-                # Usando sua função calc_reward
+                # A chamada agora corresponde à definição da função
                 r1 = calc_reward(d1, int1, s1, ci1, cl1, cost_fixed, cost_penalty)
                 r2 = calc_reward(d2, int2, s2, ci2, cl2, cost_fixed, cost_penalty)
 
@@ -174,58 +173,3 @@ with tab2:
         fig_r.add_trace(go.Scatter(x=x_axis, y=s_r2, name='Agente 2', line=dict(color='#EF553B')))
         fig_r.update_layout(title="Recompensa Média", template="plotly_dark")
         st.plotly_chart(fig_r, use_container_width=True)
-
-with tab3:
-    if st.button("Calcular Sensibilidade"):
-        
-        factors = [1.0, 1.5, 2.0, 2.5, 3.0]
-        m_d1, s_d1, m_d2, s_d2, labels = [], [], [], [], []
-        
-        for f in factors:
-            labels.append(f"{f}x")
-            e1, e2 = bat_d1 * f, bat_d2 * f
-            run_d1, run_d2 = [], []
-            
-            for _ in range(30): 
-                d1 = UCBAgent(e1)
-                d2 = UCBAgent(e2)
-                ep_r1, ep_r2 = 0, 0
-                
-                for t in range(800):
-                    ci1, cl1 = np.random.beta(ci_a, ci_b), np.random.beta(cl_a, cl_b)
-                    ci2, cl2 = np.random.beta(ci_a, ci_b), np.random.beta(cl_a, cl_b)
-                    
-                    i1, i2 = d1.select_action(), d2.select_action()
-                    a1, a2 = THRESHOLDS[i1], THRESHOLDS[i2]
-                    
-                    int1 = (ci1 < a1) and (d1.e > 0)
-                    int2 = (ci2 < a2) and (d2.e > 0)
-                    
-                    s1, s2 = False, False
-                    if int1 and int2:
-                        if np.random.rand() < prob_d1: s1 = True
-                        else: s2 = True
-                    elif int1: s1 = True
-                    elif int2: s2 = True
-                    
-                    r1 = calc_reward(d1, int1, s1, ci1, cl1, cost_fixed, cost_penalty)
-                    r2 = calc_reward(d2, int2, s2, ci2, cl2, cost_fixed, cost_penalty)
-                    
-                    d1.update(i1, r1, int1)
-                    d2.update(i2, r2, int2)
-                    ep_r1 += r1
-                    ep_r2 += r2
-                
-                run_d1.append(ep_r1/800)
-                run_d2.append(ep_r2/800)
-            
-            m_d1.append(np.mean(run_d1))
-            s_d1.append(np.std(run_d1))
-            m_d2.append(np.mean(run_d2))
-            s_d2.append(np.std(run_d2))
-
-        fig_bar = go.Figure()
-        fig_bar.add_trace(go.Bar(name='Agente 1', x=labels, y=m_d1, error_y=dict(type='data', array=s_d1), marker_color='#636EFA'))
-        fig_bar.add_trace(go.Bar(name='Agente 2', x=labels, y=m_d2, error_y=dict(type='data', array=s_d2), marker_color='#EF553B'))
-        fig_bar.update_layout(title="Impacto Bateria", template="plotly_dark", barmode='group')
-        st.plotly_chart(fig_bar, use_container_width=True)
